@@ -5,13 +5,13 @@
 
 ## Result
 ### some of the successful cases:
-![Image](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/image.PNG)
+![Image text](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/image.PNG)
 
 ### inferior cases:
-![inferior1](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior1.png)
+![Image text](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior1.png)
 
-![inferior2](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior2.png)
+![Image text](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior2.png)
 ### failure cases
-![fail3](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/fail3.png)
+![Image text](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/fail3.png)
 
-![fail4](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/fail4.png)
+![Image text](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/fail4.png)
