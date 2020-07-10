@@ -10,3 +10,4 @@
 ### inferior and failure cases:
 ![Image2](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior1.png)
 
+
