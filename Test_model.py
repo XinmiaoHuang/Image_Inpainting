@@ -107,26 +107,26 @@ def test(opt):
         test_mask = de_normalize(test_mask)
 
         psnr, ssim = evaluate_result(pred, test_img)
-        # print("PSNR: {:.5f}, SSIM: {:.5f}".format(psnr, ssim))
+        print("PSNR: {:.5f}, SSIM: {:.5f}".format(psnr, ssim))
         
-        count += 1
-        total_psnr += psnr
-        total_ssim += ssim
-        if count > 2000:
-            print("total_psnr: {:.5f}, total:ssim:{:.5f}".format(total_psnr / count, total_ssim / count))
-            break
+        # count += 1
+        # total_psnr += psnr
+        # total_ssim += ssim
+        # if count > 2000:
+        #     print("total_psnr: {:.5f}, total:ssim:{:.5f}".format(total_psnr / count, total_ssim / count))
+        #     break
 
-        # plt.figure(figsize=(32, 16))
-        # plt.axis('off')
-        # plt.title('fake image')
-        # plt.subplot(1, 3, 1)
-        # plt.imshow(np.transpose(pred[0], (1, 2, 0)))
-        # plt.subplot(1, 3, 2)
-        # plt.imshow(np.transpose(test_img[0], (1, 2, 0)))
-        # plt.subplot(1, 3, 3)
-        # plt.imshow(np.transpose(test_masked[0], (1, 2, 0)))
-        # plt.show()
-        # command = input()
+        plt.figure(figsize=(32, 16))
+        plt.axis('off')
+        plt.title('fake image')
+        plt.subplot(1, 3, 1)
+        plt.imshow(np.transpose(pred[0], (1, 2, 0)))
+        plt.subplot(1, 3, 2)
+        plt.imshow(np.transpose(test_img[0], (1, 2, 0)))
+        plt.subplot(1, 3, 3)
+        plt.imshow(np.transpose(test_masked[0], (1, 2, 0)))
+        plt.show()
+        #command = input()
 
 if __name__ == '__main__':
     print('Initialized.')
