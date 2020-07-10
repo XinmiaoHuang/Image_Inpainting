@@ -5,11 +5,8 @@
 
 ## Result
 ### some of the successful cases:
-![Image]()
+![Image1](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/image.png)
 
-### inferior cases:
-![inferior]()
+### inferior and failure cases:
+![Image2](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior1.png)
 
-
-### failure cases
-![fail]()
