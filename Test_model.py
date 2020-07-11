@@ -12,26 +12,13 @@ from options import BaseParser
 from torch.utils.data import DataLoader
 from loss import CriterionPerPixel, criterion_GAN
 from stage2 import Stage2Network
+from utils import set_requires_grad, normalize, de_normalize
 
 
 TRAINING_PATH = "./testing_images/"
 MASK_PATH = "./random_mask/"
 SAVING_PATH = "./models/"
 
-
-def normalize(x):
-    return 2.0 * x - 1
-
-def de_normalize(x):
-    return (x + 1.0) / 2.0
-
-def set_requires_grad(nets, requires_grad=False):
-    if not isinstance(nets, list):
-        nets = [nets]
-    for net in nets:
-        if net is not None:
-            for param in net.parameters():
-                param.requires_grad = requires_grad
 
 def evaluate_result(y_pred, y_true):
     img = y_pred * 255
@@ -71,7 +58,7 @@ def test(opt):
     dnet.to(device)
 
     if opt.checkpoint:
-        log_state = torch.load(opt.checkpoint)    # "./model/2020-04-17-10-07-33_recent.pth"
+        log_state = torch.load(opt.checkpoint)  
         model_dict = Punet.state_dict()
         model_dict.update(log_state)
         Punet.load_state_dict(model_dict)
@@ -79,18 +66,19 @@ def test(opt):
 
     print("Testing...................")
 
-    count = 0
-    total_psnr = 0
-    total_ssim = 0
+    # for counting average psnr and ssim of the testset
+    # count = 0
+    # total_psnr = 0
+    # total_ssim = 0
 
-    command = 'c'
-    while command != 'q':
+    while True:
         test_batch = iter(custom_loader).next()
         for idx, item in enumerate(test_batch):
                 test_batch[idx] = normalize(item)
         test_img, test_mask, test_masked, test_img_2x, test_mask_2x = test_batch
         test_img = test_img.type(torch.FloatTensor).to(device)
         test_mask = test_mask.type(torch.FloatTensor).to(device)
+
         test_masked = test_masked.type(torch.FloatTensor).to(device)
         test_img_2x = test_img_2x.type(torch.FloatTensor).to(device)
         test_mask_2x = test_mask_2x.type(torch.FloatTensor).to(device)
@@ -126,7 +114,6 @@ def test(opt):
         plt.subplot(1, 3, 3)
         plt.imshow(np.transpose(test_masked[0], (1, 2, 0)))
         plt.show()
-        #command = input()
 
 if __name__ == '__main__':
     print('Initialized.')

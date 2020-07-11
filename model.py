@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from torchvision.models import vgg16
 from PconvUnet import PconvUnet
 from PconvUnet import Discriminator, PatchDiscriminator
+import os
 
 
 class Model:
@@ -44,45 +45,13 @@ class Model:
     def save_model(self, path):
         pass
 
-    def load_model(self, path):
-        gnet_dict = torch.load(os.path.join(path, 'g_net.pth'))
-        self.model.load_state_dict(gnet_dict)
-        # dnet_dict = torch.load(os.path.join(path, 'd_net.pth'))
-        # self.dnet.load_state_dict(dnet_dict)
+    def load_model(self, path, load_g = True, load_d = True):
+        if load_g:
+            gnet_dict = torch.load(os.path.join(path, 'g_net.pth'))
+            self.model.load_state_dict(gnet_dict)
+        if load_d:
+            dnet_dict = torch.load(os.path.join(path, 'd_net.pth'))
+            self.dnet.load_state_dict(dnet_dict)
 
 
-    # def get_loss(self, mask):
-    #     def loss(I_out, I_gt):
-    #         I_comp = mask * I_gt + (1 - mask) * I_out
-    #         loss_hole = l1_loss((1-mask)*I_out, (1-mask)*I_gt)
-    #         loss_valid = l1_loss(mask*I_out, mask*I_gt)
-
-    #         vgg_Iout = self.vgg16(I_out)
-    #         vgg_Icomp = self.vgg16(I_comp)
-    #         vgg_Igt = self.vgg16(I_gt)
-
-    #         loss_perceptual = 0
-    #         loss_style_out = 0
-    #         loss_style_comp = 0
-
-    #         for o, g in zip(vgg_Iout, vgg_Igt):
-    #             loss_style_out += l1_loss(gmm(o), gmm(g))
-
-    #         for o, c, g in zip(vgg_Iout, vgg_Icomp, vgg_Igt):
-    #             loss_perceptual += l1_loss(o, g) + l1_loss(c, g)
-    #             # loss_style_comp += l1_loss(gmm(c), gmm(g))
-
-    #         # kernel = K.ones(shape=(3, 3, mask.shape[3], mask.shape[3]))
-    #         # dilated_mask = K.conv2d(1 - mask, kernel, data_format='channels_last', padding='same')
-    #         #
-    #         # dilated_mask = K.cast(K.greater(dilated_mask, 0), 'float32')
-    #         # P = dilated_mask * I_comp
-    #         #
-    #         # a = l1_loss(P[:, 1:, :, :], P[:, :-1, :, :])
-    #         # b = l1_loss(P[:, :, 1:, :], P[:, :, :-1, :])
-    #         # loss_tv = a + b
-    #         loss_total = loss_valid + 6 * loss_hole + 0.05 * loss_perceptual + 120 * (
-    #                 loss_style_out + loss_style_comp)
-    #         return loss_total
-    #     return loss
 

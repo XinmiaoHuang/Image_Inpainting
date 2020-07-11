@@ -75,5 +75,21 @@ class ResBlock(nn.Module):
         out = self.relu(out + residual)
         return out
 
+def set_requires_grad(nets, requires_grad=False):
+    if not isinstance(nets, list):
+        nets = [nets]
+    for net in nets:
+        if net is not None:
+            for param in net.parameters():
+                param.requires_grad = requires_grad
 
+def normalize(x):
+    return 2.0 * x - 1
 
+def de_normalize(x):
+    return (x + 1.0) / 2.0
+
+def random_crop(x, size=64, img_sz=256):
+    rand_x = random.randint(0, img_sz - size)
+    rand_y = random.randint(0, img_sz - size)
+    return x[:, :, rand_x:rand_x+size, rand_y:rand_y+size]

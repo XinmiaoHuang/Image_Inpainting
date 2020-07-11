@@ -12,19 +12,12 @@ from options import BaseParser
 from torch.utils.data import DataLoader
 from loss import CriterionPerPixel, CriterionD, CriterionGAN
 from stage2 import Stage2Network
-
+from utils import set_requires_grad
 
 TRAINING_PATH = "D:/Dataset/coco/"
 MASK_PATH = "./random_mask/"
 SAVING_PATH = "./models/"
 
-def set_requires_grad(nets, requires_grad=False):
-    if not isinstance(nets, list):
-        nets = [nets]
-    for net in nets:
-        if net is not None:
-            for param in net.parameters():
-                param.requires_grad = requires_grad
 
 def train(opt):
     img_data = CustomDataset(opt.data_dir, opt.mask_dir, opt.img_size)

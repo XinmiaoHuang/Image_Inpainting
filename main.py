@@ -14,30 +14,12 @@ from options import BaseParser
 from torch.utils.data import DataLoader
 from loss import CriterionPerPixel, criterion_GAN
 from stage2 import Stage2Network
+from utils import normalize, de_normalize, random_crop, set_requires_grad
 
 
 TRAINING_PATH = "D:/Dataset/coco/"
 MASK_PATH = "./random_mask/"
 SAVING_PATH = "./models/"
-
-def normalize(x):
-    return 2.0 * x - 1
-
-def de_normalize(x):
-    return (x + 1.0) / 2.0
-
-def random_crop(x, size=64, img_sz=256):
-    rand_x = random.randint(0, img_sz - size)
-    rand_y = random.randint(0, img_sz - size)
-    return x[:, :, rand_x:rand_x+size, rand_y:rand_y+size]
-
-def set_requires_grad(nets, requires_grad=False):
-    if not isinstance(nets, list):
-        nets = [nets]
-    for net in nets:
-        if net is not None:
-            for param in net.parameters():
-                param.requires_grad = requires_grad
 
 def train(opt):
     img_data = CustomDataset(opt.data_dir, opt.mask_dir, opt.img_size)
@@ -56,7 +38,7 @@ def train(opt):
     pdnet.to(device)
 
     if opt.checkpoint:
-        log_state = torch.load(opt.checkpoint)    # "./model/2020-04-17-10-07-33_recent.pth"
+        log_state = torch.load(opt.checkpoint)   
         model_dict = Punet.state_dict()
         model_dict.update(log_state)
         Punet.load_state_dict(model_dict)
@@ -94,7 +76,6 @@ def train(opt):
 
     optimizer = torch.optim.Adam(Punet.parameters(), lr= opt.lr, betas=(0.9, 0.99))
     optimizer_D = torch.optim.Adam(dnet.parameters(), lr=opt.lr * 1.3, betas=(0.9, 0.99))
-    optimizer_DP = torch.optim.Adam(pdnet.parameters(), lr=opt.lr * 1.3, betas=(0.9, 0.99))
 
     criterion = CriterionPerPixel(use_gram=True)
     criterion_D = criterion_GAN(use_lsgan=False)
@@ -107,7 +88,6 @@ def train(opt):
     losses_style = []
     losses_gan = []
     losses_d = []
-    losses_dp = []
     
 
     for epoch in range(opt.epochs):
@@ -134,56 +114,14 @@ def train(opt):
             err_d.backward()
             optimizer_D.step()
 
-            # patch dnet
-            set_requires_grad(pdnet, requires_grad=True)
-            pdnet.zero_grad()
-
-            fake = torch.cat((img, pred.detach()), dim=1)
-            real = torch.cat((img, img), dim=1)
-
-            real_loss = 0
-            fake_loss = 0
-
-            coord = []
-            rand_x = random.randint(0, 256 - 64)
-            rand_y = random.randint(0, 256 - 64)
-            coord.append((rand_x, rand_y))
-            fake_out = fake[:, :, rand_x:rand_x+64, rand_y:rand_y+64]
-            real_out = real[:, :, rand_x:rand_x+64, rand_y:rand_y+64]
-            for i in range(1, 6):
-                rand_x = random.randint(0, 256 - 64)
-                rand_y = random.randint(0, 256 - 64)
-                coord.append((rand_x, rand_y))
-                fake_out = torch.cat((fake_out, fake[:, :, rand_x:rand_x+64, rand_y:rand_y+64]), dim=0)
-                real_out = torch.cat((real_out, real[:, :, rand_x:rand_x+64, rand_y:rand_y+64]), dim=0)
-
-            real_loss = criterion_D(pdnet(real_out), True)
-            fake_loss = criterion_D(pdnet(fake_out), False)
-
-            err_dp = (real_loss + fake_loss) / 2
-            err_dp.backward()
-            optimizer_DP.step()
-
             # gnet
             set_requires_grad(dnet, requires_grad=False)
-            set_requires_grad(pdnet, requires_grad=False)
             Punet.zero_grad()
             fake_loss_g = dnet(torch.cat((masked, pred), dim=1))
             l_gan = criterionGAN(fake_loss_g, True)
 
-            l_gan2 = 0
-            fake_ = torch.cat((img, pred), dim=1)
-            fake_set = fake_[:, :, coord[0][0]:coord[0][0]+64, coord[0][1]:coord[0][1]+64]
-            for i in range(1, 6):
-                rand_x = coord[i][0]
-                rand_y = coord[i][1]
-                fake_set = torch.cat((fake_set, fake_[:, :, rand_x:rand_x+64, rand_y:rand_y+64]), dim=0)
-
-            fake_loss_g = pdnet(fake_set)
-            l_gan2 += criterionGAN(fake_loss_g, True)
-
             loss_valid, loss_hole, loss_perceptual, loss_style = criterion(pred, img, mask)
-            loss = loss_valid + 3 * loss_hole + 0.7 * loss_perceptual + 50 * loss_style + 0.2 * l_gan + 0.1 * l_gan2
+            loss = loss_valid + 3 * loss_hole + 0.7 * loss_perceptual + 50 * loss_style + 0.2 * l_gan
             loss.backward()
             optimizer.step()
 
@@ -194,7 +132,6 @@ def train(opt):
             losses_style.append(loss_style.item())
             losses_gan.append(l_gan.item())
             losses_d.append(err_d.item())
-            losses_dp.append(err_dp.item())
 
             if idx % opt.save_per_iter == 0:
                 time_str = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
@@ -204,9 +141,9 @@ def train(opt):
                 # print('Model saved.')
             if idx % 200 == 0 or (epoch == opt.epochs -1 and idx == len(custom_loader) - 1):
                 print("Epoch: {}, step: {}, loss_valid: {:.5f}, loss_hole: {:.5f}, loss_perceptual: {:.5f}, loss_total: {:.5f}, "
-                     "loss_style: {:.5f}, l_gan: {:.5f}, l_d: {:.5f}, err_dp:{:.5f}".format(epoch, idx, np.mean(losses_valid), 
+                     "loss_style: {:.5f}, l_gan: {:.5f}, l_d: {:.5f}".format(epoch, idx, np.mean(losses_valid), 
                      np.mean(losses_hole), np.mean(losses_perceptual), np.mean(losses), 
-                     np.mean(losses_style), np.mean(losses_gan), np.mean(losses_d), np.mean(losses_dp)))
+                     np.mean(losses_style), np.mean(losses_gan), np.mean(losses_d)))
 
                 losses.clear()
                 losses_valid.clear()
@@ -215,7 +152,6 @@ def train(opt):
                 losses_style.clear()
                 losses_gan.clear()
                 losses_d.clear()
-                losses_dp.clear()
 
                 with torch.no_grad():
                     pred = Punet(test_masked, test_mask)

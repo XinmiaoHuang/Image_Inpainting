@@ -50,7 +50,6 @@ class PatchDiscriminator(nn.Module):
         outputs = conv5
         if self.use_sigmoid:
             outputs = torch.sigmoid(conv5)
-
         return outputs
 
 class Discriminator(nn.Module):
@@ -74,20 +73,7 @@ class Discriminator(nn.Module):
         eps = torch.randn_like(mu)
         return mu + eps * rate
 
-    def forward(self, input_x):
-        # x = self.addNoise(input_x, rate=0.1)
-        # x_ = x_.detach().cpu()
-        # import matplotlib.pyplot as plt
-        # import numpy as np
-        # img = np.transpose(x_[0], (1, 2, 0))
-        # input_x = input_x.detach().cpu()
-        # img_ = np.transpose(input_x[0], (1, 2, 0))
-        # plt.subplot(1, 2, 1)
-        # plt.imshow(img[:, :, -3:])
-        # plt.subplot(1, 2, 2)
-        # plt.imshow(img_[:, :, -3:])
-        # plt.show()
-        
+    def forward(self, input_x):   
         x = input_x
         for i in range(len(self.model)):
             x = self.model[i](x)
@@ -230,17 +216,6 @@ class PconvUnet(nn.Module):
         self.out_conv = nn.Sequential(*[nn.ReflectionPad2d(3),
                                         nn.Conv2d(ngf, 3, 7, 1, 0), 
                                         nn.Tanh()])
-
-        # self.resnet1 = nn.Sequential(*[nn.Upsample(scale_factor=2),
-        #                               ResBlock(ngf, add_noise=True),
-        #                               ResBlock(ngf, add_noise=True)])
-        # self.resnet2 = nn.Sequential(*[nn.Upsample(scale_factor=2),
-        #                               ResBlock(ngf, add_noise=True),
-        #                               ResBlock(ngf, add_noise=True)])
-
-        
-        # self.out_conv2 = nn.Sequential(*[nn.Conv2d(ngf, 3, 3, 1, 1), nn.Tanh()])
-        # self.out_conv3 = nn.Sequential(*[nn.Conv2d(ngf, 3, 3, 1, 1), nn.Tanh()])
 
     def addNoise(self, mu, rate=0.2):
         eps = torch.randn_like(mu)

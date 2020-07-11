@@ -14,7 +14,7 @@ class BaseParser:
         self.parser.add_argument("--save_per_iter", type=int, default=600)
         self.parser.add_argument("--lr", type=float, default=0.0002)
         self.parser.add_argument("--data_dir", type=str, default='/media/homee/Data/Dataset/coco/train2014')
-        self.parser.add_argument("--mask_dir", type=str, default='./random_mask/mask/')
+        self.parser.add_argument("--mask_dir", type=str, default='./random_mask/mask_slim/')
 
     def parse(self):
         return self.parser.parse_args()
