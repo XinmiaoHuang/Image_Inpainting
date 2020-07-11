@@ -7,6 +7,7 @@
 ![Image1](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/image.png)
 
 There are problems of artifacts and color difference for some inferior or failure cases:
+
 ![Image2](https://github.com/XinmiaoHuang/Image_Inpainting/blob/master/pic/inferior1.png)
 
 
